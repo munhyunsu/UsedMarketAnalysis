@@ -9,3 +9,6 @@
 
 # ignore generated files by bash-script
 /*.txt
+
+# ignore swap files
+*.swp
