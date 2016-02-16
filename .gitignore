@@ -1,0 +1,11 @@
+# ignore output dir
+/output/
+
+# ignore personal information files
+/naver/spiders/personal
+
+# ignore compiled files (.pyc)
+*.pyc
+
+# ignore generated files by bash-script
+/*.txt
