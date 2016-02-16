@@ -10,5 +10,12 @@
 # ignore generated files by bash-script
 /*.txt
 
-# ignore swap files
-*.swp
+# ignore swap files (https://github.com/github/gitignore/tree/master/Global)
+# swap
+[._]*.s[a-w][a-z]
+[._]s[a-w][a-z]
+# session
+Session.vim
+# temporary
+.netrwhist
+*~
