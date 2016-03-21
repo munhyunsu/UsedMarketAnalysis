@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
+
+##### ##### ===== 포함 파일 =====
 # 개인적인 아이디, 비밀번호 파일.
 from personal.nconfig import COOKIE_FILE, LOGIN_ID, LOGIN_PW
 # scrapy item 파일.
@@ -21,27 +23,28 @@ import random
 # 언어 설정을 위한 sys
 import sys
 
-reload(sys)
-sys.setdefaultencoding('utf-8')
+# 필요없는 것 같아서 일단 주석처리
+# 문제 있을 경우 주석 제거
+# 문제 가능성: 한글 관련 인코딩 문제
+#reload(sys)
+#sys.setdefaultencoding('utf-8')
+##### ##### ===== 포함 파일 끝 =====
 
+##### ##### ===== 전역변수 지역 =====
+CRAWL_TARGET = 0
+CRAWL_COUNT = 0
+MAX_PAGE = 0
+
+# 아래 삭제 예정
 crawl_target = 0
 crawl_count = 0
 max_page = 0
+##### ##### ===== 전역벽수 지역 끝 =====
 
-## ----- ----- 
-## 중고나라 스파이더 클래스.
-## Current Ver = v1.3(150302)
-## @ v1.2 흐름 @
-## 1. Login페이지에서 시작.
-## 2. Login페이지에서 id입력과, pw입력폼에 personal.config에 있는 정보를 넣어서 로그인(parse).
-##  2-1. 로그인이 실패할 경우 ERROR레벨의 로그가 출력되고, output폴더에는 아무것도 남지 않음(after_login).
-## 3. 로그인이 성공한 이후 게시판(v1-SKT 1페이지만)에 Request를 보내 크롤링(after_login).
-## 4. Request의 응답이 오면 callback함수로 parse_list로 넘어감.
-## 5. 크롤링한 게시판 페이지를 저장한 후 공지사항을 제외한 일반 게시글을 식별 게시글의 url을 parsing(parse_list).
-## 6. 각 url을 urljoin을 이용해서 spider가 크롤링할 대상으로 넘겨주고 callback함수로는 parse_article을 넘겨줌(parse_list).
-## 7. 게시글의 정보(v1-게시글번호, url)를 저장한 후 각 페이지도 저장(parse_article).
-## 8. open한 파일을 닫으며 종료.
-## ----- -----
+##### ##### ===== 클래스 선언 지역 =====
+##### ----- ----- 
+##### 중고나라 스파이더 클래스.
+##### ----- -----
 class SktSpider(scrapy.Spider):
 	name = 'skt'
 	global crawl_target
@@ -156,3 +159,5 @@ class SktSpider(scrapy.Spider):
 		with open(filename, 'wb') as f:
 			f.write(response.body)
 		f.close()
+
+##### ##### ===== 클래스 선언 지역 끝 =====
