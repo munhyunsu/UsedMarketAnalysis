@@ -1,14 +1,14 @@
 # ignore output dir
-/output/
+**/output/
 
 # ignore personal information files
-/naver/spiders/personal
+**/personal/
 
 # ignore compiled files (.pyc)
 *.pyc
 
 # ignore generated files by bash-script
-/*.txt
+*.txt
 
 # ignore swap files (https://github.com/github/gitignore/tree/master/Global)
 # swap
