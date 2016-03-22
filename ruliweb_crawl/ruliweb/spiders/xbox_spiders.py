@@ -72,7 +72,6 @@ SAVE_LOCATION = 'output/xbox/'
 ##### ----- ----- 
 ##### 루리웹 스파이더 클래스
 ##### ----- -----
-#class NdsSpider(scrapy.Spider):
 class Spider(scrapy.Spider):
 	name = SPIDER_NAME
 	global CRAWL_TARGET
@@ -112,7 +111,7 @@ class Spider(scrapy.Spider):
 			formname='loginForm',
 			formdata={'id': LOGIN_ID, 'pw': LOGIN_PW},
 			clickdata={'nr': 0},
-			callback=self.after_login,
+			callback=self.after_login
 		)
 
 

@@ -1,5 +1,6 @@
 # ignore output dir
 **/output/
+**/output_phone/
 
 # ignore personal information files
 **/personal/

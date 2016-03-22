@@ -1,5 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+
+
+
+
+
+##### ##### ===== 포함 파일 =====
 # 개인적인 아이디, 비밀번호 파일.
 from personal.pconfig import LOGIN_ID, LOGIN_PW
 # scrapy item 파일.
@@ -18,50 +24,94 @@ import os.path
 # 랜덤 sleep을 위한 time, random
 import time
 import random
-# 언어설정을 위한 sys
-import sys
+# Database를 위한 sqlite3
+import sqlite3
 # 휴대폰 번호 상호 수집을 위한 urllib
 import urllib
+##### ##### ===== 포함 파일 끝 =====
 
-reload(sys)
-sys.setdefaultencoding('utf-8')
 
-crawl_target = 0
-crawl_count = 0
-max_page = 0
 
-## ----- ----- 
-## 중고나라 스파이더 클래스.
-## Current Ver = v1.4(150511)
-## @ v1.4 흐름 @
+
+
+##### ##### ===== 전역 변수 지역 =====
+RAWL_TARGET = 0
+CRAWL_COUNT = 0
+MAX_PAGE = 0
+DOWNLOAD_DELAY = 1
+conn = None
+cur = None
+##### ##### ===== 전역 변수 지역 끝 =====
+
+
+
+
+
+##### ##### ===== 프로젝트별 변수 =====
+# 주요 변수
+SPIDER_NAME = 'kt'
+START_URL = 'http://www.ppomppu.co.kr/index.php'
+BOARD_PAGE_URL_HEAD = 'http://www.ppomppu.co.kr/zboard/zboard.php?id=market_phone&page='
+BOARD_PAGE_URL_TAIL = '&category=3&divpage=196' #SKT-2, KT-3, LGT-5
+ARTICLE_URL = 'http://www.ppomppu.co.kr/zboard/view.php?id=market_phone&no='
+
+DATABASE_NAME = 'ppomppu.sqlite'
+LIST_DB = 'list_kt'
+DOWNLOADED_DB = 'downloaded_kt'
+DOWNLOADED_PHONE_DB = 'downloaded_phone_kt'
+
+# 임시 변수
+TARGET_FILE = 'target_kt.txt'
+MAX_FILE = 'max_kt.txt'
+LOGIN_FILE = 'output/login_kt.html'
+ARTICLE_AHREF = '//a[contains(@href, "view.php?id=market_phone") and not(contains(@href, "&&"))]/@href'
+SAVE_LOCATION = 'output/kt/'
+SAVE_LOCATION_PHONE = 'output_phone/kt/'
+##### ##### ===== 프로젝트별 변수 끝 =====
+
+
+
+
+
+##### ##### ===== 클래스 선언 지역 =====
+##### ----- -----
+##### 뽐뿌 스파이더 클래스
+##### ----- -----
 ## ----- -----
-class KtSpider(scrapy.Spider):
-	name = 'kt'
-	global crawl_target
-	global crawl_count
-	global max_page
-	# Download_delay 설정(v1-2S).
-	download_delay = 1
-	# 로그인을 하고 시작해야함.
-	# 따라서 로그인 페이지에서 시작.
+class Spider(scrapy.Spider):
+	name = SPIDER_NAME
+	global CRAWL_TARGET
+	global CRAWL_COUNT
+	global MAX_PAGE
+	global conn
+	global cur
+
+	# 딜레이 설정
+	download_delay = DOWNLOAD_DELAY
+
+	# 로그인을 하고 시작해야함
+	# 따라서 로그인 페이지에서 시작
 	start_urls = [
-		'http://www.ppomppu.co.kr/index.php'
+		START_URL
 	]
 
-	# 파일로부터 수집할 개수를 읽어옴.
-	# 이렇게 하는 것이 소스코드 수정 없이 수집양을 조절할 수 있음.
-	target_file = open('target_kt.txt', 'r')
-	crawl_target = int(target_file.readline())
+	# 파일로부터 수집할 개수를 읽어옴
+	# 이렇게 하는 것이 소스코드 수정 없이 수집양을 조절할 수 있음
+	target_file = open(TARGET_FILE, 'r')
+	CRAWL_TARGET = int(target_file.readline())
 	target_file.close()
-	max_file = open('max_kt.txt', 'r')
-	max_page = int(max_file.readline())
+
+	max_file = open(MAX_FILE, 'r')
+	MAX_PAGE = int(max_file.readline())
 	max_file.close()
 
-	# 로그인을 하는 함수.
+
+
+	# 로그인을 하는 함수
 	def parse(self, response):
-		# 로그인을 수정하기 위한 부분.
-		# 각 폼에 맞게 id와 pw를 입력.
-		# 이후의 쿠키는 scrapy가 알아서 관리해줌.
+		# 로그인을 수정하기 위한 부분
+		# 각 폼에 맞게 id와 pw를 입력
+		# 이후의 쿠키는 scrapy가 알아서 관리해줌
 		return scrapy.FormRequest.from_response(
 			response,
 			formname='zb_login',
@@ -70,96 +120,174 @@ class KtSpider(scrapy.Spider):
 			callback=self.after_login,
 		)
 
-	# 로그인이후 게시판 List에서 각 게시글 URL을 얻기위한 함수.
+	# 로그인이후 게시판 List에서 각 게시글 URL을 얻기위한 함수
 	def after_login(self, response):
-		# 로그인 디버깅용.
-		filename = 'output/login_kt.html'
-		with open(filename, 'wb') as f:
+		# 글로벌 변수를 불러옴
+		global CRAWL_TARGET
+		global CRAWL_COUNT
+		global MAX_PAGE
+		global conn
+		global cur
+
+		# 로그인 디버깅 용
+		with open(LOGIN_FILE, 'wb') as f:
 			f.write(response.body)
 		f.close()
-		# 혹시 로그인이 실패했을 경우.
-		# 아직 이 장소로 예외처리가 된 경우가 없어서 정상 작동을 하는지 알 수 없음.
-		if 'authentication failed' in response.body:
-			# personal.config에 있는 id, pw를 임의의 정보로 넣어서 실험해보면 확인 가능.
-			self.log('Login failed', level=log.ERROR)
-			return
-		else:
-			# 다운로드 리스트 초기화
-			list_f = open('output/list_kt.txt', 'w')
-			list_f.close()
-			# 로그인 성공 후 게시판에서 각 게시글의 URL을 따옴.
-			# 이땐 공지사항 URL도 같이 들어옴.
-			# SKT - 2, KT - 3, LGT - 5
-			return Request(url='http://www.ppomppu.co.kr/zboard/zboard.php?id=market_phone&page=1&category=3&divpage=196', callback=self.parse_list)
 
-	# 수집한 게시판 정보에서 공지사항을 제외한 게시글 URL을 파싱.
+		# Create Database Connector
+		conn = sqlite3.connect(DATABASE_NAME)
+		# Create Database Cursor
+		cur = conn.cursor()
+
+		# Create Table
+		cur.executescript('''
+			CREATE TABLE IF NOT EXISTS ''' + LIST_DB + ''' (
+			article_num INTEGER PRIMARY KEY NOT NULL UNIQUE);
+			''' +
+			'''
+			CREATE TABLE IF NOT EXISTS ''' + DOWNLOADED_DB + ''' (
+			article_num INTEGER PRIMARY KEY NOT NULL UNIQUE);
+			''' + 
+			'''
+			CREATE TABLE IF NOT EXISTS ''' + DOWNLOADED_PHONE_DB + ''' (
+			article_num INTEGER PRIMARY KEY NOT NULL UNIQUE);
+			'''
+		)
+		conn.commit()
+
+		# 이전 수집때 목표로 저장해둔 리스트 수 불러오기
+		cur.execute('''
+			SELECT COUNT(*) FROM ''' + LIST_DB 
+		)
+		CRAWL_COUNT = CRAWL_COUNT + int(cur.fetchone()[0])
+
+		# 로그인 성공 후 게시판에서 각 게시글의 URL을 따옴
+		return Request(url=BOARD_PAGE_URL_HEAD + str(1) + BOARD_PAGE_URL_TAIL, callback=self.parse_list)
+
+
+
+	# 수집한 게시판 정보에서 공지사항을 제외한 게시글 URL을 파싱
 	def parse_list(self, response):
-		# 글로벌 변수를 불러옴.
-		global crawl_target
-		global crawl_count
-		global max_page
-		# 다운로드 리스트를 작성하기 위한 파일 오픈.
-		list_f = open('output/list_kt.txt', 'ab')
+		# 글로벌 변수를 불러옴
+		global CRAWL_TARGET
+		global CRAWL_COUNT
+		global MAX_PAGE
+		global conn
+		global cur
+
 		# 사용자가 작성한 게시글 파악
-		for i in response.xpath('//a[contains(@href, "view.php?id=market_phone") and not(contains(@href, "&&"))]/@href').extract():
-			if crawl_count >= crawl_target:
+		for ahref in response.xpath(ARTICLE_AHREF).extract():
+			# 수집 목표량을 채웠을 경우 탈출
+			if CRAWL_COUNT >= CRAWL_TARGET:
 				break
-			else:
-				#print i
-				article_num = re.split(r'[?=&]', i)[10]
-				if os.path.isfile('output/kt/' + article_num + '.html'):
-					print 'target skip: ' + article_num
-				else:
-					article_url = 'http://www.ppomppu.co.kr/zboard/view.php?id=market_phone&no=' + article_num + '\n'
-					list_f.write(article_url)
-					crawl_count = crawl_count + 1
+			
+			# 게시글 번호 파싱
+			article_num = re.split(r'[?=&]', ahref)[10]
+			# 이미 받은 게시글일 경우 패스
+			cur.execute('SELECT * FROM ' + DOWNLOADED_DB + ' WHERE article_num = ' + str(article_num)
+			)
+			if cur.fetchone() is not None:
+				print 'tartget skip: ' + str(article_num)
+				continue
+				
+			# 다운로드 대상에 입력
+			cur.execute('INSERT OR IGNORE INTO ' + LIST_DB + ' (article_num) VALUES ('	+ str(article_num) + ')'
+			)
+			conn.commit()
+			CRAWL_COUNT = CRAWL_COUNT + 1
 
-		# 리스트 추가 후 닫기.
-		list_f.close()
-
-		# 목표 개수 만큼 리스트를 채웠는지 체크.
+		# 목표 개수 만큼 리스트를 채웠는지 체크
 		page_num = int(re.split(r'[?&=]', response.url)[4])
-		if ((crawl_count >= crawl_target) or (page_num >= max_page)):
+		if ((CRAWL_COUNT >= CRAWL_TARGET) or (page_num >= MAX_PAGE)):
 			return self.crawl_article()
 		else:
-			# 목표 개수 미달인 경우 다음 페이지 불러오기.
-			next_url = 'http://www.ppomppu.co.kr/zboard/zboard.php?id=market_phone&page=' + str(page_num+1) + '&category=3&divpage=196'
+			# 목표 개수 미달인 경우 다음 페이지 불러오기
+			next_url = BOARD_PAGE_URL_HEAD + str(page_num+1) + BOARD_PAGE_URL_TAIL
 			return Request(url=next_url, callback=self.parse_list)
+
 		
-	# 게시글 수집.
+
+	# 게시글 수집
 	def crawl_article(self):
-		read_list_f = open('output/list_kt.txt', 'r')
-		url_lists = read_list_f.readlines()
-		for i in url_lists:
-			sleep_var = random.randint(0, 1)
-			time.sleep(sleep_var)
-			# yield를 이용해야 Request를 보낼 수 있음.
-			# 가장 오랜 시간이 걸린 부분이므로 수정을 할 시 백업본 생성 필수.
-			# 또한 수정을 했을 경우 수정 이력도 남겨둘 것(비교를 위함).
-			yield Request(i[:-1], callback=self.parse_article)
+		# 글로벌 변수를 불러옴
+		global CRAWL_TARGET
+		global CRAWL_COUNT
+		global MAX_PAGE
+		global conn
+		global cur
+
+		# 다운로드 대상 리스트 불러오기
+		# 참고: yield로 Request를 전송하기 때문에 cur가 동시에 사용될 가능성이 있다
+		# 	따라서 fetchall()로 데이터를 모두 가져와야 한다
+		cur.execute('SELECT * FROM ' + LIST_DB)
+		target_list = cur.fetchall()
+
+		# Request 보내기
+		for data in target_list:
+			# request_url 조립
+			article_num = data[0]
+			request_url = ARTICLE_URL + str(article_num)
+
+			# Request를 날리기 전 다운로드 대상 리스트에서 제거
+			cur.execute('DELETE FROM ' + LIST_DB + ' WHERE article_num = ' + str(article_num)
+			)
+			conn.commit()
+
+			# 랜덤 sleep
+			time.sleep(random.randint(0, 1))
 			
-	# 각 게시글의 원본을 저장.
+			# 요청 전송
+			yield Request(request_url, callback = self.parse_article)
+
+
+			
+	# 각 게시글의 원본을 저장
 	def parse_article(self, response):
-		# 게시글에서 Parsing을 하는 방법을 찾기위해 수집한 게시글을 파일로 저장.
+		# 글로벌 변수를 불러옴.
+		global CRAWL_TARGET
+		global CRAWL_COUNT
+		global MAX_PAGE
+		global conn
+		global cur
+
+		# 수집한 게시글 다운로드 완료 리스트에 저장
 		article_num = re.split(r'[?=&]', response.url)[4]
-		filename = 'output/kt/' + article_num + '.html'
-		with open(filename, 'wb') as f:
+		cur.execute('INSERT OR IGNORE INTO ' + DOWNLOADED_DB + ' (article_num) VALUES (' + str(article_num) + ')'
+		)
+		conn.commit()
+
+		# 수집한 게시글을 파일로 저장
+		with open(SAVE_LOCATION + article_num + '.html', 'wb') as f:
 			f.write(response.body)
 		f.close()
-		#from scrapy.shell import inspect_response
-		#inspect_response(response, self)
+
+		# 전화번호가 있을 경우 수집
 		try:
 			p1 = urllib.quote(re.split(r'[\'=]', response.xpath('//div[@id="market_phone_number"]')[0].extract())[4])
 			p2 = urllib.quote(re.split(r'[\'=]', response.xpath('//div[@id="market_phone_number"]')[0].extract())[8])
 			phone_url = 'http://www.ppomppu.co.kr/zboard/a_v_phone2.php?p1=' + p1 + '&p2=' + p2
-			#yield Request(url=phone_url, callback=self.parse_phone, article_num = article_num)
 			yield Request(url=phone_url, callback=lambda response, typeid=5: self.parse_phone(response, article_num))
 		except:
 			pass
+		
+
 
 	# 전화번호 수집.
 	def parse_phone(self, response, article_num):
-		filename = 'output_phone/kt/' + article_num + '.html'
-		with open(filename, 'wb') as f:
+		# 글로벌 변수를 불러옴.
+		global CRAWL_TARGET
+		global CRAWL_COUNT
+		global MAX_PAGE
+		global conn
+		global cur
+
+		# 수집한 전화번호 게시글 전화번호 리스트에 저장
+		cur.execute('INSERT OR IGNORE INTO ' + DOWNLOADED_PHONE_DB + ' (article_num) VALUES (' + str(article_num) + ')'
+		)
+		conn.commit()
+
+		# 수집한 전화번호 게시글 파일로 저장
+		with open(SAVE_LOCATION_PHONE + article_num + '.html', 'wb') as f:
 			f.write(response.body)
 		f.close()
+##### ##### ===== 클래스 선언 지역 끝 =====
