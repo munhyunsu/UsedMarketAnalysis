@@ -8,10 +8,10 @@
 #     http://doc.scrapy.org/en/latest/topics/settings.html
 #
 
-BOT_NAME = 'naver'
+BOT_NAME = 'joonggonara'
 
-SPIDER_MODULES = ['naver.spiders']
-NEWSPIDER_MODULE = 'naver.spiders'
+SPIDER_MODULES = ['joonggonara.spiders']
+NEWSPIDER_MODULE = 'joonggonara.spiders'
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'naver (+http://www.yourdomain.com)'
@@ -23,5 +23,5 @@ DOWNLOADER_MIDDLEWARES = {
 USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36"
 
 ITEM_PIPELINES = {
-	'naver.pipelines.NaverPipeline': 300,
+	'joonggonara.pipelines.JoonggonaraPipeline': 300,
 }

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
+# -*- coding: UTF-8 -*-
 
 
 
@@ -7,9 +7,9 @@
 
 ##### ##### ===== 포함 파일 =====
 # 개인적인 아이디, 비밀번호 파일.
-from personal.pconfig import LOGIN_ID, LOGIN_PW
+from personal.jconfig import LOGIN_ID, LOGIN_PW
 # scrapy item 파일.
-from ppomppu.items import PpomppuItem
+from joonggonara.items import JoonggonaraItem
 # 로그인을 위한 FormRequest.
 # 로그인 이후 크롤링을 위한 Request.
 from scrapy.http import FormRequest, Request
@@ -26,8 +26,6 @@ import time
 import random
 # Database를 위한 sqlite3
 import sqlite3
-# 휴대폰 번호 상호 수집을 위한 urllib
-import urllib
 ##### ##### ===== 포함 파일 끝 =====
 
 
@@ -35,10 +33,10 @@ import urllib
 
 
 ##### ##### ===== 전역 변수 지역 =====
-RAWL_TARGET = 0
+CRAWL_TARGET = 0
 CRAWL_COUNT = 0
 MAX_PAGE = 0
-DOWNLOAD_DELAY = 1
+DOWNLOAD_DELAY = 2
 conn = None
 cur = None
 ##### ##### ===== 전역 변수 지역 끝 =====
@@ -49,24 +47,21 @@ cur = None
 
 ##### ##### ===== 프로젝트별 변수 =====
 # 주요 변수
-SPIDER_NAME = 'lgt'
-START_URL = 'http://www.ppomppu.co.kr/index.php'
-BOARD_PAGE_URL_HEAD = 'http://www.ppomppu.co.kr/zboard/zboard.php?id=market_phone&page='
-BOARD_PAGE_URL_TAIL = '&category=5&divpage=196' #SKT-2, KT-3, LGT-5
-ARTICLE_URL = 'http://www.ppomppu.co.kr/zboard/view.php?id=market_phone&no='
+SPIDER_NAME = 'kt'
+START_URL = 'http://nid.naver.com/nidlogin.login'
+BOARD_PAGE_URL = 'http://cafe.naver.com/ArticleList.nhn?search.boardtype=L&userDisplay=50&search.menuid=424&search.questionTab=A&search.clubid=10050146&search.specialmenutype=&search.totalCount=501&search.page=' # SKT - 339, KT - 424, LGT - 425, 여성상의(fup) - 356, 남성상의(mup) - 358
+ARTICLE_URL = 'http://cafe.naver.com/ArticleRead.nhn?clubid=10050146&page=1&menuid=424&boardtype=L&articleid='
 
-DATABASE_NAME = 'ppomppu.sqlite'
-LIST_DB = 'list_lgt'
-DOWNLOADED_DB = 'downloaded_lgt'
-DOWNLOADED_PHONE_DB = 'downloaded_phone_lgt'
+DATABASE_NAME = 'joonggonara.sqlite'
+LIST_DB = 'list_kt'
+DOWNLOADED_DB = 'downloaded_kt'
 
 # 임시 변수
-TARGET_FILE = 'target_lgt.txt'
-MAX_FILE = 'max_lgt.txt'
-LOGIN_FILE = 'output/login_lgt.html'
-ARTICLE_AHREF = '//a[contains(@href, "view.php?id=market_phone") and not(contains(@href, "&&"))]/@href'
-SAVE_LOCATION = 'output/lgt/'
-SAVE_LOCATION_PHONE = 'output_phone/lgt/'
+TARGET_FILE = 'target_kt.txt'
+MAX_FILE = 'max_kt.txt'
+LOGIN_FILE = 'output/login_kt.html'
+ARTICLE_AHREF = '//a[contains(@href, "articleid") and not(contains(@href, "specialmenutype"))]/@href'
+SAVE_LOCATION = 'output/kt/'
 ##### ##### ===== 프로젝트별 변수 끝 =====
 
 
@@ -74,10 +69,9 @@ SAVE_LOCATION_PHONE = 'output_phone/lgt/'
 
 
 ##### ##### ===== 클래스 선언 지역 =====
+##### ----- ----- 
+##### 중고나라 스파이더 클래스
 ##### ----- -----
-##### 뽐뿌 스파이더 클래스
-##### ----- -----
-## ----- -----
 class Spider(scrapy.Spider):
 	name = SPIDER_NAME
 	global CRAWL_TARGET
@@ -114,11 +108,13 @@ class Spider(scrapy.Spider):
 		# 이후의 쿠키는 scrapy가 알아서 관리해줌
 		return scrapy.FormRequest.from_response(
 			response,
-			formname='zb_login',
-			formdata={'user_id': LOGIN_ID, 'password': LOGIN_PW},
+			formname='frmNIDLogin',
+			formdata={'id': LOGIN_ID, 'pw': LOGIN_PW},
 			clickdata={'nr': 0},
 			callback=self.after_login
 		)
+
+
 
 	# 로그인이후 게시판 List에서 각 게시글 URL을 얻기위한 함수
 	def after_login(self, response):
@@ -138,7 +134,7 @@ class Spider(scrapy.Spider):
 		conn = sqlite3.connect(DATABASE_NAME)
 		# Create Database Cursor
 		cur = conn.cursor()
-
+			
 		# Create Table
 		cur.executescript('''
 			CREATE TABLE IF NOT EXISTS ''' + LIST_DB + ''' (
@@ -146,10 +142,6 @@ class Spider(scrapy.Spider):
 			''' +
 			'''
 			CREATE TABLE IF NOT EXISTS ''' + DOWNLOADED_DB + ''' (
-			article_num INTEGER PRIMARY KEY NOT NULL UNIQUE);
-			''' + 
-			'''
-			CREATE TABLE IF NOT EXISTS ''' + DOWNLOADED_PHONE_DB + ''' (
 			article_num INTEGER PRIMARY KEY NOT NULL UNIQUE);
 			'''
 		)
@@ -162,7 +154,7 @@ class Spider(scrapy.Spider):
 		CRAWL_COUNT = CRAWL_COUNT + int(cur.fetchone()[0])
 
 		# 로그인 성공 후 게시판에서 각 게시글의 URL을 따옴
-		return Request(url=BOARD_PAGE_URL_HEAD + str(1) + BOARD_PAGE_URL_TAIL, callback=self.parse_list)
+		return Request(url=BOARD_PAGE_URL + str(1), callback=self.parse_list)
 
 
 
@@ -182,7 +174,8 @@ class Spider(scrapy.Spider):
 				break
 			
 			# 게시글 번호 파싱
-			article_num = re.split(r'[?=&]', ahref)[10]
+			article_num = re.split(r'[?=&]', ahref)[12]
+
 			# 이미 받은 게시글일 경우 패스
 			cur.execute('SELECT * FROM ' + DOWNLOADED_DB + ' WHERE article_num = ' + str(article_num)
 			)
@@ -197,16 +190,16 @@ class Spider(scrapy.Spider):
 			CRAWL_COUNT = CRAWL_COUNT + 1
 
 		# 목표 개수 만큼 리스트를 채웠는지 체크
-		page_num = int(re.split(r'[?&=]', response.url)[4])
+		page_num = int(re.split(r'[=]', response.url)[8])
 		if ((CRAWL_COUNT >= CRAWL_TARGET) or (page_num >= MAX_PAGE)):
 			return self.crawl_article()
 		else:
 			# 목표 개수 미달인 경우 다음 페이지 불러오기
-			next_url = BOARD_PAGE_URL_HEAD + str(page_num+1) + BOARD_PAGE_URL_TAIL
+			next_url = BOARD_PAGE_URL + str(page_num+1)
 			return Request(url=next_url, callback=self.parse_list)
 
-		
 
+	
 	# 게시글 수집
 	def crawl_article(self):
 		# 글로벌 변수를 불러옴
@@ -240,7 +233,7 @@ class Spider(scrapy.Spider):
 			yield Request(request_url, callback = self.parse_article)
 
 
-			
+
 	# 각 게시글의 원본을 저장
 	def parse_article(self, response):
 		# 글로벌 변수를 불러옴.
@@ -251,43 +244,13 @@ class Spider(scrapy.Spider):
 		global cur
 
 		# 수집한 게시글 다운로드 완료 리스트에 저장
-		article_num = re.split(r'[?=&]', response.url)[4]
+		article_num = re.split(r'[?=&]', response.url)[10]
 		cur.execute('INSERT OR IGNORE INTO ' + DOWNLOADED_DB + ' (article_num) VALUES (' + str(article_num) + ')'
 		)
 		conn.commit()
 
 		# 수집한 게시글을 파일로 저장
 		with open(SAVE_LOCATION + article_num + '.html', 'wb') as f:
-			f.write(response.body)
-		f.close()
-
-		# 전화번호가 있을 경우 수집
-		try:
-			p1 = urllib.quote(re.split(r'[\'=]', response.xpath('//div[@id="market_phone_number"]')[0].extract())[4])
-			p2 = urllib.quote(re.split(r'[\'=]', response.xpath('//div[@id="market_phone_number"]')[0].extract())[8])
-			phone_url = 'http://www.ppomppu.co.kr/zboard/a_v_phone2.php?p1=' + p1 + '&p2=' + p2
-			yield Request(url=phone_url, callback=lambda response, typeid=5: self.parse_phone(response, article_num))
-		except:
-			pass
-		
-
-
-	# 전화번호 수집.
-	def parse_phone(self, response, article_num):
-		# 글로벌 변수를 불러옴.
-		global CRAWL_TARGET
-		global CRAWL_COUNT
-		global MAX_PAGE
-		global conn
-		global cur
-
-		# 수집한 전화번호 게시글 전화번호 리스트에 저장
-		cur.execute('INSERT OR IGNORE INTO ' + DOWNLOADED_PHONE_DB + ' (article_num) VALUES (' + str(article_num) + ')'
-		)
-		conn.commit()
-
-		# 수집한 전화번호 게시글 파일로 저장
-		with open(SAVE_LOCATION_PHONE + article_num + '.html', 'wb') as f:
 			f.write(response.body)
 		f.close()
 ##### ##### ===== 클래스 선언 지역 끝 =====

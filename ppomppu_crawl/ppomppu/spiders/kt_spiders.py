@@ -117,7 +117,7 @@ class Spider(scrapy.Spider):
 			formname='zb_login',
 			formdata={'user_id': LOGIN_ID, 'password': LOGIN_PW},
 			clickdata={'nr': 0},
-			callback=self.after_login,
+			callback=self.after_login
 		)
 
 	# 로그인이후 게시판 List에서 각 게시글 URL을 얻기위한 함수
