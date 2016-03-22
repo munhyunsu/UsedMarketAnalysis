@@ -24,7 +24,7 @@ import os.path
 # 랜덤 sleep을 위한 time, random
 import time
 import random
-# Database를 위한 sqlite2
+# Database를 위한 sqlite3
 import sqlite3
 ##### ##### ===== 포함 파일 끝 =====
 
@@ -32,14 +32,14 @@ import sqlite3
 
 
 
-##### ##### ===== 전역변수 지역 =====
+##### ##### ===== 전역 변수 지역 =====
 CRAWL_TARGET = 0
 CRAWL_COUNT = 0
 MAX_PAGE = 0
 DOWNLOAD_DELAY = 3
 conn = None
 cur = None
-##### ##### ===== 전역변수 지역 끝 =====
+##### ##### ===== 전역 변수 지역 끝 =====
 
 
 

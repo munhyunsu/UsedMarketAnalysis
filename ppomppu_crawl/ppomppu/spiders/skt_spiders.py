@@ -1,5 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+
+
+
+
+
+##### ##### ===== 포함 파일 =====
 # 개인적인 아이디, 비밀번호 파일.
 from personal.pconfig import LOGIN_ID, LOGIN_PW
 # scrapy item 파일.
@@ -18,13 +24,18 @@ import os.path
 # 랜덤 sleep을 위한 time, random
 import time
 import random
-# 언어설정을 위한 sys
-import sys
 # 휴대폰 번호 상호 수집을 위한 urllib
 import urllib
+# Database를 위한 sqlite3
+import sqlite3
+##### ##### ===== 포함 파일 끝 =====
 
-reload(sys)
-sys.setdefaultencoding('utf-8')
+
+
+
+
+##### ##### ===== 전역 변수 지역 =====
+##### ##### ===== 전역 변수 지역 끝 =====
 
 crawl_target = 0
 crawl_count = 0
