@@ -64,9 +64,14 @@ def main():
 		# Insert value
 		subdir = src_path + subdirs + '/'
 		for subfiles in os.listdir(subdir):
-			cur.execute('INSERT OR IGNORE INTO ' + table + ' (article_num) VALUES (' + subfiles.split('.')[0] + ')'
-			)
-			conn.commit()
+			try:
+				article_num = int(subfiles.split('.')[0])
+				cur.execute('INSERT OR IGNORE INTO ' + table + ' (article_num) VALUES (' + str(article_num) + ')'
+				)
+				conn.commit()
+			except:
+				print 'Error', subfiles
+				continue
 
 	print 'Create Complete'
 ##### ##### ===== 함수 구현 구역 끝 =====
