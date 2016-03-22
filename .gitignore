@@ -10,6 +10,9 @@
 # ignore generated files by bash-script
 *.txt
 
+# ignore sqlite files
+*.sqlite
+
 # ignore swap files (https://github.com/github/gitignore/tree/master/Global)
 # swap
 [._]*.s[a-w][a-z]
