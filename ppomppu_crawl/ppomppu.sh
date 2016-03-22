@@ -17,3 +17,5 @@ mkdir -p ./output_phone/lgt
 scrapy crawl lgt
 echo 'lgt Done'
 sleep 5
+
+remove_1024b.sh

@@ -23,3 +23,5 @@ mkdir -p ./output/psp
 scrapy crawl psp
 echo 'psp Done'
 sleep 5
+
+remove_1024b.sh
