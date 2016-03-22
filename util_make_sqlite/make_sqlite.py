@@ -70,7 +70,7 @@ def main():
 				)
 				conn.commit()
 			except:
-				print 'Error', subfiles
+				print 'Error', subdirs, subfiles
 				continue
 
 	print 'Create Complete'
