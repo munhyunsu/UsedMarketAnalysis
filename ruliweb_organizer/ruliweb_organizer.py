@@ -77,6 +77,9 @@ def main():
 			# 년/월/일 가져오기
 			subfile = subdir + subfiles
 			date = getDate(subfile).split('.')
+			if date if None:
+				print 'Error None Return', subdirs, subfiles
+				continue
 			year = date[0]
 			month = date[1]
 			day = date[2]
