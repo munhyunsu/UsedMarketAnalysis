@@ -66,10 +66,11 @@ def main():
 		for subfiles in os.listdir(subdir):
 			# 년/월/일 가져오기
 			subfile = subdir + subfiles
-			date = getDate(subfile).split('.')
+			date = getDate(subfile)
 			if date is None:
 				print 'Error None Return', subdirs, subfiles
 				continue
+			date = date.split('.')
 			year = date[0]
 			month = date[1]
 			day = date[2]
