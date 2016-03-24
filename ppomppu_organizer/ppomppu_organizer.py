@@ -84,8 +84,11 @@ def main():
 					os.makedirs(path, 0755)
 				except:
 					pass
-			
-			shutil.move(subfile, path)
+			try:
+				shutil.move(subfile, path)
+			except shutil.Error:
+				print 'Error Alreay Exists', subdirs, subfiles
+				continue
 			#shutil.copy(subfile, path) # for test
 			#print 'Move Complete', path # for test
 
