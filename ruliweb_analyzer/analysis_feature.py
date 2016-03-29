@@ -33,6 +33,7 @@ def parse_html(file_path):
 	# 게시글 제목을 가져오는 부분.
 	tds = soup.find_all("td", "con")
 	article_title = tds[0].b.contents[0].encode('utf-8').strip()
+	article_title = article_title.replace('"', '_')
 
 	# 게시글 번호를 가져오는 부분.
 	# tds = soup.find_all("td", "con") # 제목과 동일
@@ -57,6 +58,7 @@ def parse_html(file_path):
 	# 게시글 작성자 닉네임을 가져오는 부분.
 	# tables = soup.find_all("table", { "id" : "marketread" }) # 시간과 동일
 	article_nick = tables[0].find_all("span")[0].contents[0].encode('utf-8').strip()
+	article_nick = article_nick.replace('"', '_')
 
 	# 게시글 작성자 IP를 가져오는 부분.
 	# tables = soup.find_all("table", { "id" : "marketread" }) # 시간과 동일
@@ -144,7 +146,8 @@ def insert_to_db(conn, cur, file_path):
 			result = parse_html(file_path)
 		except:
 			print 'Parse Error: ' + file_path
-		cur.execute('INSERT OR IGNORE INTO ruliweb \
+		try:
+			query = 'INSERT OR IGNORE INTO ruliweb \
 			(article_number, article_title, \
 			article_location, article_time, \
 			article_nick, article_ip, \
@@ -153,22 +156,24 @@ def insert_to_db(conn, cur, file_path):
 			sales_done, img_count, \
 			text_len \
 			) \
-			VALUES (' +
-			'' + str(result['article_number']) + ', ' +
-			'"' + str(result['article_title']) + '", ' +
-			'"' + str(result['article_location']) + '", ' +
-			'"' + str(result['article_time']) + '", ' +
-			'"' + str(result['article_nick']) + '", ' +
-			'"' + str(result['article_ip']) + '", ' +
-			'"' + str(result['article_prize']) + '", ' +
-			'"' + str(result['article_phone']) + '", ' +
-			'"' + str(result['detail_phone']) + '", ' +
-			'"' + str(result['detail_email']) + '", ' +
-			'"' + str(result['sales_done']) + '", ' +
-			'"' + str(result['img_count']) + '", ' +
-			'"' + str(result['text_len']) +
-			'")'
-		)
+			VALUES (' + \
+				'"' + str(result['article_number']) + '", ' + \
+				'"' + str(result['article_title']) + '", ' + \
+				'"' + str(result['article_location']) + '", ' + \
+				'"' + str(result['article_time']) + '", ' + \
+				'"' + str(result['article_nick']) + '", ' + \
+				'"' + str(result['article_ip']) + '", ' + \
+				'"' + str(result['article_prize']) + '", ' + \
+				'"' + str(result['article_phone']) + '", ' + \
+				'"' + str(result['detail_phone']) + '", ' + \
+				'"' + str(result['detail_email']) + '", ' + \
+				'"' + str(result['sales_done']) + '", ' + \
+				'"' + str(result['img_count']) + '", ' + \
+				'"' + str(result['text_len']) + \
+				'")'
+			cur.execute(query)
+		except:
+			print 'Query Error: ' + query
 		conn.commit()
 ##### End of insert_to_db()
 
