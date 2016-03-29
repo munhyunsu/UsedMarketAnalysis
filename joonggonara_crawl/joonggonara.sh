@@ -25,4 +25,4 @@ scrapy crawl mup
 echo 'mup Done'
 sleep 5
 
-remove_1024b.sh
+./remove_1024b.sh

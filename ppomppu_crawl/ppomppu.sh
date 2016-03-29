@@ -18,4 +18,4 @@ scrapy crawl lgt
 echo 'lgt Done'
 sleep 5
 
-remove_1024b.sh
+./remove_1024b.sh
