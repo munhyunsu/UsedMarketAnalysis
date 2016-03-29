@@ -144,37 +144,37 @@ def insert_to_db(conn, cur, file_path):
 	else:
 		try:
 			result = parse_html(file_path)
+			try:
+				query = 'INSERT OR IGNORE INTO ruliweb \
+				(article_number, article_title, \
+				article_location, article_time, \
+				article_nick, article_ip, \
+				article_prize, article_phone, \
+				detail_phone, detail_email, \
+				sales_done, img_count, \
+				text_len \
+				) \
+				VALUES (' + \
+					'"' + str(result['article_number']) + '", ' + \
+					'"' + str(result['article_title']) + '", ' + \
+					'"' + str(result['article_location']) + '", ' + \
+					'"' + str(result['article_time']) + '", ' + \
+					'"' + str(result['article_nick']) + '", ' + \
+					'"' + str(result['article_ip']) + '", ' + \
+					'"' + str(result['article_prize']) + '", ' + \
+					'"' + str(result['article_phone']) + '", ' + \
+					'"' + str(result['detail_phone']) + '", ' + \
+					'"' + str(result['detail_email']) + '", ' + \
+					'"' + str(result['sales_done']) + '", ' + \
+					'"' + str(result['img_count']) + '", ' + \
+					'"' + str(result['text_len']) + \
+					'")'
+				cur.execute(query)
+				conn.commit()
+			except:
+				print 'Query Error: ' + query
 		except:
 			print 'Parse Error: ' + file_path
-		try:
-			query = 'INSERT OR IGNORE INTO ruliweb \
-			(article_number, article_title, \
-			article_location, article_time, \
-			article_nick, article_ip, \
-			article_prize, article_phone, \
-			detail_phone, detail_email, \
-			sales_done, img_count, \
-			text_len \
-			) \
-			VALUES (' + \
-				'"' + str(result['article_number']) + '", ' + \
-				'"' + str(result['article_title']) + '", ' + \
-				'"' + str(result['article_location']) + '", ' + \
-				'"' + str(result['article_time']) + '", ' + \
-				'"' + str(result['article_nick']) + '", ' + \
-				'"' + str(result['article_ip']) + '", ' + \
-				'"' + str(result['article_prize']) + '", ' + \
-				'"' + str(result['article_phone']) + '", ' + \
-				'"' + str(result['detail_phone']) + '", ' + \
-				'"' + str(result['detail_email']) + '", ' + \
-				'"' + str(result['sales_done']) + '", ' + \
-				'"' + str(result['img_count']) + '", ' + \
-				'"' + str(result['text_len']) + \
-				'")'
-			cur.execute(query)
-		except:
-			print 'Query Error: ' + query
-		conn.commit()
 ##### End of insert_to_db()
 
 
