@@ -13,6 +13,7 @@
 
 # ignore sqlite files
 *.sqlite
+*.sqlite-journal
 
 # ignore swap files (https://github.com/github/gitignore/tree/master/Global)
 # swap
