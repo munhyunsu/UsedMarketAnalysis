@@ -5,6 +5,9 @@
 # ignore personal information files
 **/personal/
 
+# ignore third party library
+**/tlib/
+
 # ignore compiled files (.pyc)
 *.pyc
 
