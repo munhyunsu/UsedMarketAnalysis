@@ -213,6 +213,9 @@ def main():
 		maxmind_distance = get_distance_vincenty(city_latlng, mmdb_latlng)
 		ip2location_distance = get_distance_vincenty(city_latlng, ip2_latlng)
 
+		if(maxmind_distance > 500) or (ip2location_distance > 500):
+			print article_number, article_ip, city_latlng, mmdb_latlng, ip2_latlng, maxmind_distance, ip2location_distance
+
 		cur.execute('''INSERT OR IGNORE INTO distance (article_number, article_location, maxmind_distance, ip2location_distance) VALUES ( ?, ?, ?, ? )''', (article_number, article_location, maxmind_distance, ip2location_distance) )
 	conn.commit()
 
