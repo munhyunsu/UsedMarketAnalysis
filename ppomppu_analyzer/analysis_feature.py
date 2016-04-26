@@ -98,7 +98,7 @@ def parse_html(file_path):
 def insert_to_db(conn, cur, file_path):
 	article_number = re.split(r'[/]', file_path)[-1]
 	article_number = article_number[:-5]
-	cur.execute('SELECT * FROM ruliweb WHERE article_number = ' + str(article_number)
+	cur.execute('SELECT * FROM ppomppu WHERE article_number = ' + str(article_number)
 	)
 	if cur.fetchone() is not None:
 		print 'Already Insert: ' + str(article_number)
@@ -106,29 +106,21 @@ def insert_to_db(conn, cur, file_path):
 		try:
 			result = parse_html(file_path)
 			try:
-				query = 'INSERT OR IGNORE INTO ruliweb \
+				query = 'INSERT OR IGNORE INTO ppomppu \
 				(article_number, article_title, \
-				article_location, article_time, \
-				article_nick, article_ip, \
+				article_time, article_nick, \
 				article_prize, article_phone, \
-				detail_phone, detail_email, \
-				sales_done, img_count, \
-				text_len \
+				detail_phone, detail_email \
 				) \
 				VALUES (' + \
 					'"' + str(result['article_number']) + '", ' + \
 					'"' + str(result['article_title']) + '", ' + \
-					'"' + str(result['article_location']) + '", ' + \
 					'"' + str(result['article_time']) + '", ' + \
 					'"' + str(result['article_nick']) + '", ' + \
-					'"' + str(result['article_ip']) + '", ' + \
 					'"' + str(result['article_prize']) + '", ' + \
 					'"' + str(result['article_phone']) + '", ' + \
 					'"' + str(result['detail_phone']) + '", ' + \
-					'"' + str(result['detail_email']) + '", ' + \
-					'"' + str(result['sales_done']) + '", ' + \
-					'"' + str(result['img_count']) + '", ' + \
-					'"' + str(result['text_len']) + \
+					'"' + str(result['detail_email']) + \
 					'")'
 				cur.execute(query)
 				conn.commit()
@@ -192,8 +184,8 @@ def main():
 				dir_list.append(dir_cur + sub_contents + '/')
 			else:
 				file_path = dir_cur + sub_contents
-				print parse_html(file_path)
-#				insert_to_db(conn, cur, file_path)
+#				print parse_html(file_path)
+				insert_to_db(conn, cur, file_path)
 				#print file_path, os.path.isfile(file_path)
 
 	print 'Done'
