@@ -155,9 +155,9 @@ def main():
 	# Create Database Cursor
 	cur = conn.cursor()
 
-	# Debug
-	cur.execute('DROP TABLE IF EXISTS ppomppu')
-	conn.commit()
+	## Debug
+	#cur.execute('DROP TABLE IF EXISTS ppomppu')
+	#conn.commit()
 
 	# Create Table
 	cur.executescript('''
@@ -184,7 +184,6 @@ def main():
 				dir_list.append(dir_cur + sub_contents + '/')
 			else:
 				file_path = dir_cur + sub_contents
-#				print parse_html(file_path)
 				insert_to_db(conn, cur, file_path)
 				#print file_path, os.path.isfile(file_path)
 
