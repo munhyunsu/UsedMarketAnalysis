@@ -36,6 +36,7 @@ def parse_html(file_path):
 
 	# 게시글 제목을 가져오는 부분.
 	article_title = soup.find_all("font", "view_title2")[0].contents[1].encode('utf-8')
+	article_title = article_title.replace('"', '_')
 
 	# 게시글 작성자 닉네임을 가져오는 부분.
 	try:
@@ -44,6 +45,7 @@ def parse_html(file_path):
 		#article_nick = str(soup.find_all("font", "view_name")[0].contents[0])
 		article_nick = soup.find_all("font", "view_name")[0].contents[0]
 	article_nick = article_nick.encode('utf-8')
+	article_nick = article_nick.replace('"', '_')
 
 	# 게시글 시간을 가져오는 부분.
 	temp_time = soup.find_all("table", { "style": "table-layout:fixed" })[0]
@@ -51,7 +53,10 @@ def parse_html(file_path):
 	article_time = temp_time[0][0] + '.' + temp_time[0][1] + '.' + temp_time[0][2] + '. ' + temp_time[0][3] + ':' + temp_time[0][4]
 
 	# 게시글 가격을 가져오는 부분.
-	article_prize = soup.find_all("div", "market_phone_menu02")[0].contents[0].encode('utf-8')
+	try:
+		article_prize = soup.find_all("div", "market_phone_menu02")[0].contents[0].encode('utf-8')
+	except:
+		article_prize = None
 
 	# 게시글 번호를 가져오는 부분.
 	temp_phone = soup.find_all('div', 'market_phone_menu03')[0]
@@ -62,7 +67,12 @@ def parse_html(file_path):
 		article_phone = False
 
 	# 게시글 본문을 가져오는 부분.
-	tb_detail = str(soup.find_all("td", "han")[2])
+	try:
+		tb_detail = str(soup.find_all("td", "han")[2])
+	except:
+		tb_detail = str(soup.find_all('table', {'border': '0', 'cellspacing': '0', 
+			'cellpadding': '0', 'width': '100%'})[1])
+
 	# 본문 번호를 가져오는 부분.
 	# 본문 연락처
 	detail_phone = re.findall(r"(\d{3})-(\d{4})-(\d{4})", tb_detail)
