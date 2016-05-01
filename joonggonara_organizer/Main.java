@@ -61,7 +61,7 @@ public class Main {
 					}
 					try{ 
 						//Files.copy(srcPath, desPath, REPLACE_EXISTING);
-						Files.copy(srcPath, desPath);
+						Files.move(srcPath, desPath);
 					} catch(IOException e) { // 만일을 위한 Exception
 						e.printStackTrace();
 					}
