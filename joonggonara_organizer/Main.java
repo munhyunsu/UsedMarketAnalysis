@@ -91,8 +91,13 @@ public class Main {
 		/* 게시글 시간 Get */
 		String article_time = null;
 		Elements temps = null;
-		temps = html.getElementsByClass("date"); // class="m-tcol-c date"중 date가 전체 문서중 유일함, 따라서 date로 검색
-		article_time = (temps.first()).text();
+		try{
+			temps = html.getElementsByClass("date"); // class="m-tcol-c date"중 date가 전체 문서중 유일함, 따라서 date로 검색
+			article_time = (temps.first()).text();
+		} catch(NullPointerException e) {
+			article_time = "1989.06.08.";
+			e.printStackTrace();
+		}
 
 		/* 게시글 시간 반환 */
 		return article_time;
