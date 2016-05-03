@@ -16,6 +16,11 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+/* SQLite */
+import java.sql.DriverManager;
+import java.sql.Connection;
+import java.sql.Statement;
+
 public class Main {
 	/**
 	* 메인 메소드
@@ -37,6 +42,36 @@ public class Main {
 		List<String> dirList = new LinkedList<String>();
 		// Queue에 디렉터리 저장
 		dirList.add(src);
+
+		// JDBC for SQLite
+		Connection conn = null;
+		Statement stmt = null;
+		try {
+			Class.forName("org.sqlite.JDBC");
+			conn = DriverManager.getConnection("jdbc:sqlite:" + des);
+			System.out.println("Opened database successfully");
+			stmt = conn.createStatement();
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+
+		// Create DB
+		try{
+			//stmt.executeUpdate("DROP TABLE joonggonara;");
+			stmt.executeUpdate("CREATE TABLE IF NOT EXISTS joonggonara (" +
+					"article_number TEXT PRIMARY KEY NOT NULL UNIQUE, " +
+					"article_time TEXT, " +
+					"article_title TEXT, " +
+					"article_id TEXT, " +
+					"article_nick TEXT, " +
+					"article_phone TEXT, " +
+					"article_email TEXT, " +
+					"detail_phone TEXT, " +
+					"detail_email TEXT);");
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+
 		// 경로에 있는 파일을 읽어와 Loop
 		while(dirList.isEmpty() == false) { //isEmpty() - 비어있을 경우 true리턴
 			// 경로 Pop
@@ -48,7 +83,7 @@ public class Main {
 			for( int i = 0; i < listOfFiles.length; i++ ) {
 				if( listOfFiles[i].isFile() == true ) { // 파일 일 경우
 					//System.out.println("File: " + listOfFiles[i].getPath());// DEBUG
-					parsePrivacy(listOfFiles[i].getPath());
+					parsePrivacy(listOfFiles[i].getPath(), stmt);
 				} else if( listOfFiles[i].isDirectory() == true ) {
 					System.out.println("Directory: " + listOfFiles[i].getPath()); // DEBUG
 					// 서브 디렉터리 삽입
@@ -56,13 +91,22 @@ public class Main {
 				} // end if
 			} // end for
 		} // end while
+
+
+		try {
+			stmt.close();
+			conn.close();
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+
 	} // end SurfFile()
 
 
 	/**
 	* 파일 경로를 인자로 받아 파싱을 하는 메소드
 	*/
-	private static void parsePrivacy(String path) {
+	private static void parsePrivacy(String path, Statement stmt) {
 		// document html
 		Document html = null;
 
@@ -102,54 +146,54 @@ public class Main {
 		article_title = article_title.replace("\"", "_");
 
 		// 아이디 파싱
-		String header_id = null;
+		String article_id = null;
 		temps = html.getElementsByClass("m-tcol-c") // class="m-tcol-c b"
 				.select("a.b[onclick]"); // <a> 이며 b onclick attr이 있는 것
-		header_id = (temps.first()).attr("onclick"); // onclick attribute value를 가져옴
-		header_id = (header_id.split("'", 3))[1]; // "'"로 split을 하고 2번째 인자를 가져옴
+		article_id = (temps.first()).attr("onclick"); // onclick attribute value를 가져옴
+		article_id = (article_id.split("'", 3))[1]; // "'"로 split을 하고 2번째 인자를 가져옴
 
 		// 닉네임 파싱
-		String header_nick = null;
+		String article_nick = null;
 		temps = html.getElementsByClass("m-tcol-c") // class="m-tcol-c b"
 				.select("a.b[onclick]"); // <a> 이며 b onclick이 있는 것
-		header_nick = (temps.first()).text(); // 첫번째의 Text
-		header_nick = (header_nick.split("\\(", 2))[0]; // 닉네임(아이디) 형식으로 반환되니 split
-
-		// 이메일 파싱
-		String header_email = null;
-		temps = html.getElementsByClass("rp") // class="rp"
-				.select("a.m-tcol-c:not(.view_contact):not(.view_tel)"); // 파싱
-		if(temps.size() != 0) {
-			header_email = (temps.first()).text();
-		} else {
-			header_email = null;
-		}
+		article_nick = (temps.first()).text(); // 첫번째의 Text
+		article_nick = (article_nick.split("\\(", 2))[0]; // 닉네임(아이디) 형식으로 반환되니 split
 
 		// 휴대폰 번호 파싱
-		String header_phone = null;
+		String article_phone = null;
 		temps = html.getElementsByClass("rp")
 				.select("div:not(a):not(span)");
 		if(temps.size() != 0) {
-			header_phone = (temps.first()).text();
+			article_phone = (temps.first()).text();
 			reg = Pattern.compile("\\d{3}-\\d{3,4}-\\d{4}");
-			mat = reg.matcher(header_phone);
+			mat = reg.matcher(article_phone);
 			if(mat.find()) {
-				header_phone = mat.group(0);
+				article_phone = mat.group(0);
 			} else {
 				reg = Pattern.compile("\\*{3}-\\*{3,4}-\\*{4}");
-				mat = reg.matcher(header_phone);
+				mat = reg.matcher(article_phone);
 				if(mat.find()) {
-					header_phone = mat.group(0);
+					article_phone = mat.group(0);
 				} else {
-					header_phone = null;
+					article_phone = null;
 				}
 			}
 		} else {
-			header_phone = null;
+			article_phone = null;
 		}
 		temp = html.getElementById("bt_showPhoneNo");
 		if(temp != null) {
-			header_phone = "Protect_Number";
+			article_phone = "Protect_Number";
+		}
+
+		// 이메일 파싱
+		String article_email = null;
+		temps = html.getElementsByClass("rp") // class="rp"
+				.select("a.m-tcol-c:not(.view_contact):not(.view_tel)"); // 파싱
+		if(temps.size() != 0) {
+			article_email = (temps.first()).text();
+		} else {
+			article_email = null;
 		}
 
 		// 본문
@@ -163,52 +207,73 @@ public class Main {
 		}
 
 		// 휴대폰 번호(바디) 파싱
-		String body_phone = null;
+		String detail_phone = null;
 		reg = Pattern.compile("\\d{3}-\\d{3,4}-\\d{4}");
 		mat = reg.matcher(body_text);
 		if(mat.find()) {
-			body_phone = mat.group(0);
+			detail_phone = mat.group(0);
 		}
 		reg = Pattern.compile("\\d{3}.\\d{3,4}.\\d{4}");
 		mat = reg.matcher(body_text);
 		if(mat.find()) {
-			body_phone = mat.group(0);
+			detail_phone = mat.group(0);
 		}
 		reg = Pattern.compile("\\d{3} \\d{3,4} \\d{4}");
 		mat = reg.matcher(body_text);
 		if(mat.find()) {
-			body_phone = mat.group(0);
+			detail_phone = mat.group(0);
 		}
-		if(body_phone != null) {
-			body_phone = body_phone.replace(".", "-");
-			body_phone = body_phone.replace(" ", "-");
+		if(detail_phone != null) {
+			detail_phone = detail_phone.replace(".", "-");
+			detail_phone = detail_phone.replace(" ", "-");
 		}
 
 		// 이베일 주소(		
-		String body_email = null;
+		String detail_email = null;
 		reg = Pattern.compile("\\w{5,20}@\\w{4,7}.com");
 		mat = reg.matcher(body_text);
 		if(mat.find()) {
-			body_email = mat.group(0);
+			detail_email = mat.group(0);
 		}
 		reg = Pattern.compile("\\w{5,20}@\\w{4,7}.co.kr");
 		mat = reg.matcher(body_text);
 		if(mat.find()) {
-			body_email = mat.group(0);
+			detail_email = mat.group(0);
 		}
 
-
+		// Insert Data
+		try {
+			stmt.executeUpdate("INSERT OR IGNORE INTO joonggonara (" +
+					"article_number, article_time, " + 
+					"article_title, article_id, " +
+					"article_nick, article_phone, " +
+					"article_email, detail_phone, " +
+					"detail_email) " + 
+				"VALUES (" +
+					"\"" + article_number + "\", " +
+					"\"" + article_time + "\", " +
+					"\"" + article_title + "\", " +
+					"\"" + article_id + "\", " +
+					"\"" + article_nick + "\", " +
+					"\"" + article_phone + "\", " +
+					"\"" + article_email + "\", " +
+					"\"" + detail_phone + "\", " +
+					"\"" + detail_email + "\"" +
+				");");
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
 
 		// DEBUG
-		System.out.println("article_number: " + article_number +
-			", article_time: " + article_time +
-			", article_title: " + article_title +
-			", header_id: " + header_id +
-			", header_nick: " + header_nick +
-			", header_email: " + header_email +
-			", header_phone: " + header_phone +
-			", body_phone: " + body_phone +
-			", body_email: " + body_email);
+//		System.out.println("article_number: " + article_number +
+//			", article_time: " + article_time +
+//			", article_title: " + article_title +
+//			", header_id: " + header_id +
+//			", header_nick: " + header_nick +
+//			", header_email: " + header_email +
+//			", header_phone: " + header_phone +
+//			", body_phone: " + body_phone +
+//			", body_email: " + body_email);
 	}
 
 }
