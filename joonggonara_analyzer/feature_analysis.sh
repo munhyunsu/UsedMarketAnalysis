@@ -1,3 +1,3 @@
 #!/bin/bash
 
-java Main ./output joonggonara.sqlite
+make run args="./output joonggonara.sqlite"
