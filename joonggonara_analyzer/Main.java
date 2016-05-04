@@ -20,6 +20,7 @@ import org.jsoup.select.Elements;
 import java.sql.DriverManager;
 import java.sql.Connection;
 import java.sql.Statement;
+import java.sql.ResultSet;
 
 public class Main {
 	/**
@@ -107,6 +108,23 @@ public class Main {
 	* 파일 경로를 인자로 받아 파싱을 하는 메소드
 	*/
 	private static void parsePrivacy(String path, Statement stmt) {
+		// Duplicate Check
+		try {
+			String[] tokens = path.split("/|\\.");
+			String path_article_number = tokens[tokens.length - 2];
+			ResultSet rs = stmt.executeQuery(
+				"SELECT * FROM joonggonara WHERE article_number LIKE " + 
+				path_article_number);
+
+			if(rs.isBeforeFirst() == true) {
+				System.out.println("[INFO] Already Inserted: " +
+					path_article_number);
+				return;
+			}
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+
 		// document html
 		Document html = null;
 
@@ -263,7 +281,7 @@ public class Main {
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
-
+		
 		// DEBUG
 //		System.out.println("article_number: " + article_number +
 //			", article_time: " + article_time +
@@ -274,6 +292,7 @@ public class Main {
 //			", header_phone: " + header_phone +
 //			", body_phone: " + body_phone +
 //			", body_email: " + body_email);
-	}
+		return;
+	} // end
 
 }
