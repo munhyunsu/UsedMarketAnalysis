@@ -18,6 +18,12 @@
 *.sqlite
 *.sqlite-journal
 
+# ignore html
+*.html
+
+# ignore .csv
+*.csv
+
 ## Java
 # Compiled class
 *.class
