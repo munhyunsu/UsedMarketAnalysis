@@ -40,10 +40,18 @@ def main():
 	ifile = open(sys.argv[1], 'r')
 	creader = csv.reader(ifile, delimiter = ',', quotechar = '"')
 
+	ofile = open(sys.argv[2], 'w')
+	cwriter = csv.writer(ofile, delimiter = ',', quotechar = '"', quoting = csv.QUOTE_ALL)
+
 	# csv파일 루프
 	for row in creader:
-		print row[0]
+		gresult = google.search(row[0], 1)
+		cwriter.writerow([row[0], len(gresult)])
+		time.sleep(1)
 
+	# 파일 닫기
+	ifile.close()
+	ofile.close()
 # end main
 
 if __name__ == '__main__':
