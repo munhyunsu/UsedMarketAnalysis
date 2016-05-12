@@ -10,6 +10,7 @@ from google import google
 import csv
 # sleep
 import time
+import random
 ##### #####
 
 
@@ -47,7 +48,7 @@ def main():
 	for row in creader:
 		gresult = google.search(row[0], 1)
 		cwriter.writerow([row[0], len(gresult)])
-		time.sleep(1)
+		time.sleep(random.randint(1, 3))
 
 	# 파일 닫기
 	ifile.close()
