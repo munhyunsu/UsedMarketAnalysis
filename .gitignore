@@ -1,3 +1,7 @@
+# whois html
+whois/whois_htmls/
+
+
 # ignore output dir
 **/output/
 **/output_phone/
@@ -42,6 +46,9 @@ hs_err_pid*
 ## Java Third Party Lib
 !**/jar/*.jar
 
+
+# ignore libreoffce swap files
+*.*#
 
 
 # ignore swap files (https://github.com/github/gitignore/tree/master/Global)
