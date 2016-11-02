@@ -48,9 +48,9 @@ cur = None
 ##### ##### ===== 프로젝트별 변수 =====
 # 주요 변수
 SPIDER_NAME = 'ngc'
-START_URL = 'http://login.daum.net/accounts/loginform.do?url=http://ruliweb.daum.net'
-BOARD_PAGE_URL = 'http://market.ruliweb.daum.net/list.htm?table=market_ngc&find=&ftext=&ftext2=&ftext3=3&page='
-ARTICLE_URL = 'http://market.ruliweb.daum.net/read.htm?table=market_ngc&page=&num='
+START_URL = 'https://user.ruliweb.com/member/login'
+BOARD_PAGE_URL = 'http://market.ruliweb.com/list.htm?table=market_ngc&find=&ftext=&ftext2=&ftext3=3&page='
+ARTICLE_URL = 'http://market.ruliweb.com/read.htm?table=market_ngc&page=&num='
 
 DATABASE_NAME = 'ruliweb.sqlite'
 LIST_DB = 'list_ngc'
@@ -109,7 +109,7 @@ class Spider(scrapy.Spider):
 		return scrapy.FormRequest.from_response(
 			response,
 			formname='loginForm',
-			formdata={'id': LOGIN_ID, 'pw': LOGIN_PW},
+			formdata={'user_id': LOGIN_ID, 'user_pw': LOGIN_PW},
 			clickdata={'nr': 0},
 			callback=self.after_login
 		)
