@@ -1,3 +1,11 @@
+# python venv
+/bin
+/include
+/lib
+/lib64
+pip-selfcheck.json
+pyvenv.cfg
+
 # whois html
 whois/whois_htmls/
 
@@ -16,6 +24,7 @@ whois/whois_htmls/
 
 # ignore generated files by bash-script
 *.txt
+!requirements.txt
 
 # ignore sqlite files
 *.sqlite
