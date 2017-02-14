@@ -6,6 +6,9 @@
 pip-selfcheck.json
 pyvenv.cfg
 
+# setting files
+*.ini
+
 # whois html
 whois/whois_htmls/
 
