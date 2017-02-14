@@ -11,6 +11,7 @@ pyvenv.cfg
 
 # whois html
 whois/whois_htmls/
+*.ods
 
 # ignore output dir
 **/output/
