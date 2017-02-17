@@ -16,16 +16,22 @@ class RuliwebSpider(scrapy.Spider):
     name = None # 스파이더 이름: 이것으로 실행 호출
 
     # 각종 환경변수 불러오기
-    def __init__(self):
+    def __init__(self, name = None, ini_file = 'ruliweb.ini'):
+        # 환경 변수파일 이름 저장
+        self.name = name
+        self.ini_file = ini_file
+        # 설정파일 세션 확인
+        self._check_ini(self.ini_file)
+        # 설정파일 리드
         config = configparser.ConfigParser()
-        config.read('ruliweb.ini')
+        config.read(self.ini_file)
         # 프로그램 동작 관련
         self.debug_level = int(config['debug']['level'])
         # 중간 디버깅: 이름 확인
         if self.name == None:
             if self.debug_level <= 4:
                 print('[ERROR] Please set name of crawler ' + \
-                      '(Now: {0}'.format(name))
+                      '(Now: {0})'.format(name))
         # 로그인용 변수들
         self.id = config['login']['id']
         self.passwd = config['login']['passwd']
@@ -53,6 +59,135 @@ class RuliwebSpider(scrapy.Spider):
                 );
                 ''')
         self.connector.commit()
+
+    def _check_ini(self, ini_file):
+        config = configparser.ConfigParser()
+        config.read(ini_file)
+        # 환경 변수파일 존재 및 내용 여부 확인
+        if len(config.sections()) == 0:
+            raise OSError('[SYSTEM] ini file is not exists (INI: {0})'\
+                    .format(ini_file))
+        # login 세션 확인
+        if not 'login' in config:
+            raise KeyError('[SYSTEM] login section is not exists in ini ' +
+                    ' file (INI: {0})'.format(ini_file))
+        if not 'id' in config['login']:
+            raise KeyError('[SYSTEM] id fieid is not exists in ' +
+                    ' login section of ini file (INI: {0})'.format(
+                    ini_file))
+        if len(config['login']['id']) == 0:
+            raise AttributeError('[SYSTEM] id value may be None (INI: ' +
+                    '{0})'.format(ini_file))
+        if not 'passwd' in config['login']:
+            raise KeyError('[SYSTEM] passwd fieid is not exists in ' +
+                    ' login section of ini file (Name: {0})'.format(
+                    ini_file))
+        if len(config['login']['passwd']) == 0:
+            raise AttributeError('[SYSTEM] passwd value may be None ' +
+                    '(INI: {0})'.format(ini_file))
+        # debug 세션 확인
+        if not 'debug' in config:
+            raise KeyError('[SYSTEM] debug section is not exists in ini ' +
+                    ' file (INI: {0})'.format(ini_file))
+        if not 'level' in config['debug']:
+            raise KeyError('[SYSTEM] level fieid is not exists in ' +
+                    ' debug section of ini file (INI: {0})'.format(
+                    ini_file))
+        if len(config['debug']['level']) == 0:
+            raise AttributeError('[SYSTEM] level value may be None (INI: ' +
+                    '{0})'.format(ini_file))
+        # file 세션 확인
+        if not 'file' in config:
+            raise KeyError('[SYSTEM] file section is not exists in ini ' +
+                    ' file (INI: {0})'.format(ini_file))
+        if not 'output_location' in config['file']:
+            raise KeyError('[SYSTEM] output_location fieid is ' +
+                    'not exists in file section of ' +
+                    'ini file (INI: {0})'.format(ini_file))
+        if len(config['file']['output_location']) == 0:
+            raise AttributeError('[SYSTEM] output_location value ' +
+                    'may be None (INI: {0})'.format(ini_file))
+        if not 'login' in config['file']:
+            raise KeyError('[SYSTEM] login fieid is ' +
+                    'not exists in file section of ' +
+                    'ini file (INI: {0})'.format(ini_file))
+        if len(config['file']['login']) == 0:
+            raise AttributeError('[SYSTEM] login value ' +
+                    'may be None (INI: {0})'.format(ini_file))
+        if not 'database' in config['file']:
+            raise KeyError('[SYSTEM] database fieid is ' +
+                    'not exists in file section of ' +
+                    'ini file (INI: {0})'.format(ini_file))
+        if len(config['file']['database']) == 0:
+            raise AttributeError('[SYSTEM] database value ' +
+                    'may be None (INI: {0})'.format(ini_file))
+        # crawl 세션 확인
+        if not 'crawl' in config:
+            raise KeyError('[SYSTEM] crawl section is not exists in ini ' +
+                    ' file (INI: {0})'.format(ini_file))
+        if not 'start_urls' in config['crawl']:
+            raise KeyError('[SYSTEM] start_urls fieid is ' +
+                    'not exists in crawl section of ' +
+                    'ini file (INI: {0})'.format(ini_file))
+        if len(config['crawl']['start_urls']) == 0:
+            raise AttributeError('[SYSTEM] start_urls value ' +
+                    'may be None (INI: {0})'.format(ini_file))
+        if not 'download_delay' in config['crawl']:
+            raise KeyError('[SYSTEM] download_delay fieid is ' +
+                    'not exists in crawl section of ' +
+                    'ini file (INI: {0})'.format(ini_file))
+        if len(config['crawl']['download_delay']) == 0:
+            raise AttributeError('[SYSTEM] download_delay value ' +
+                    'may be None (INI: {0})'.format(ini_file))
+        if not 'goal' in config['crawl']:
+            raise KeyError('[SYSTEM] goal fieid is ' +
+                    'not exists in crawl section of ' +
+                    'ini file (INI: {0})'.format(ini_file))
+        if len(config['crawl']['goal']) == 0:
+            raise AttributeError('[SYSTEM] goal value ' +
+                    'may be None (INI: {0})'.format(ini_file))
+        if not 'max_page' in config['crawl']:
+            raise KeyError('[SYSTEM] max_page fieid is ' +
+                    'not exists in crawl section of ' +
+                    'ini file (INI: {0})'.format(ini_file))
+        if len(config['crawl']['max_page']) == 0:
+            raise AttributeError('[SYSTEM] max_page value ' +
+                    'may be None (INI: {0})'.format(ini_file))
+        if not 'board_urls' in config['crawl']:
+            raise KeyError('[SYSTEM] board_urls fieid is ' +
+                    'not exists in crawl section of ' +
+                    'ini file (INI: {0})'.format(ini_file))
+        if len(config['crawl']['board_urls'].splitlines()) < 1:
+            raise AttributeError('[SYSTEM] board_urls value ' +
+                    'may be not 2 lines (INI: {0})'.format(ini_file))
+        if not 'article_url_form' in config['crawl']:
+            raise KeyError('[SYSTEM] article_url_form fieid is ' +
+                    'not exists in crawl section of ' +
+                    'ini file (INI: {0})'.format(ini_file))
+        if len(config['crawl']['article_url_form'].splitlines()) < 1:
+            raise AttributeError('[SYSTEM] article_url_form value ' +
+                    'may be not 2 lines (INI: {0})'.format(ini_file))
+        if not 'article_url_re' in config['crawl']:
+            raise KeyError('[SYSTEM] article_url_re fieid is ' +
+                    'not exists in crawl section of ' +
+                    'ini file (INI: {0})'.format(ini_file))
+        if len(config['crawl']['article_url_re'].splitlines()) < 1:
+            raise AttributeError('[SYSTEM] article_url_re value ' +
+                    'may be not 2 lines (INI: {0})'.format(ini_file))
+        if not 'page_number_re' in config['crawl']:
+            raise KeyError('[SYSTEM] page_number_re fieid is ' +
+                    'not exists in crawl section of ' +
+                    'ini file (INI: {0})'.format(ini_file))
+        if len(config['crawl']['page_number_re'].splitlines()) < 1:
+            raise AttributeError('[SYSTEM] page_number_re value ' +
+                    'may be not 2 lines (INI: {0})'.format(ini_file))
+        if not 'article_urls' in config['crawl']:
+            raise KeyError('[SYSTEM] article_urls fieid is ' +
+                    'not exists in crawl section of ' +
+                    'ini file (INI: {0})'.format(ini_file))
+        if len(config['crawl']['article_urls'].splitlines()) < 1:
+            raise AttributeError('[SYSTEM] article_urls value ' +
+                    'may be not 2 lines (INI: {0})'.format(ini_file))
 
     # 로그인 시도
     def parse(self, response):
