@@ -207,7 +207,7 @@ class RuliwebSpider(scrapy.Spider):
         # INFO 레벨 이하일 경우 로그인 파일 저장
         if self.debug_level <= 2:
             config = configparser.ConfigParser()
-            config.read('self.ini_file')
+            config.read(self.ini_file)
             with open(config['file']['login'], 'w') as login_file:
                 login_file.write(response.body.decode('utf-8'))
             print('[INFO] Login result html file saving at {0}'.format(
@@ -238,7 +238,7 @@ class RuliwebSpider(scrapy.Spider):
     # 수집한 게시판 정보에서 게시글 URL 파싱: 공지사항 제외
     def url_spider(self, response):
         config = configparser.ConfigParser()
-        config.read('self.ini_file')
+        config.read(self.ini_file)
         article_url_form = config['crawl']['article_url_form'].splitlines()
         article_url_form = article_url_form[0] + self.name + \
                            article_url_form[1]
@@ -320,7 +320,7 @@ class RuliwebSpider(scrapy.Spider):
         article_list = self.cursor.fetchall()
         # url 조립 준비
         config = configparser.ConfigParser()
-        config.read('self.ini_file')
+        config.read(self.ini_file)
         article_urls = config['crawl']['article_urls'].splitlines()
 
         # Request 보내기
@@ -351,7 +351,7 @@ class RuliwebSpider(scrapy.Spider):
     # 게시글 저장
     def save_article(self, response):
         config = configparser.ConfigParser()
-        config.read('self.ini_file')
+        config.read(self.ini_file)
         article_url_re = config['crawl']['article_url_re'].splitlines()
 
         # 응답온 게시글 다운로드 완료 DB에 저장
