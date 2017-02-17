@@ -218,7 +218,7 @@ class RuliwebSpider(scrapy.Spider):
             if self.debug_level <= 4:
                 print('[ERROR] Login fail (Response URL: {0})'.format(
                       response.url))
-            sys.exit(0)
+            raise Exception('[FATAL] Login fail')
 
         # 로그인 성공
         if self.debug_level <= 1:
