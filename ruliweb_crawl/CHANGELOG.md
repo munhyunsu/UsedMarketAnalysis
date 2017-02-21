@@ -1,5 +1,10 @@
 # Change Log
 
+## 3.0.3: 170221
+- spider name 지정 제거: unittest 비활성화 (임시)
+- 루리웹 중고장터 마지막 게시판 페이지 인식
+  - 마지막 페이지일 경우 목표치에 도달하지 않았어도 수집 시작
+
 ## 3.0.2: 170217
 - INI file unittest 추가
 - (ruliweb\_spider.py) ini 파일 경로를 입력받을 수 있음

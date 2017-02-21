@@ -16,9 +16,8 @@ class RuliwebSpider(scrapy.Spider):
     name = None # 스파이더 이름: 이것으로 실행 호출
 
     # 각종 환경변수 불러오기
-    def __init__(self, name = None, ini_file = 'ruliweb.ini'):
+    def __init__(self, ini_file = 'ruliweb.ini'):
         # 환경 변수파일 이름 저장
-        self.name = name
         self.ini_file = ini_file
         # 설정파일 세션 확인
         self._check_ini(self.ini_file)
@@ -296,7 +295,8 @@ class RuliwebSpider(scrapy.Spider):
         self.cursor.execute('''
                 SELECT COUNT(*) FROM list_''' + self.name)
         list_length = int(self.cursor.fetchone()[0])
-        if (list_length >= self.goal) or (page_num >= max_page):
+        if (list_length >= self.goal) or (page_number >= max_page) or \
+                (len(response.xpath(article_url_form).extract()) == 0):
             return self.crawl_article()
         else:
             # 게시판 페이지 요청
