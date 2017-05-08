@@ -14,7 +14,7 @@ whois/whois_htmls/
 *.ods
 
 # ignore output dir
-**/output/
+**/output*/
 **/output_phone/
 
 # ignore personal information files

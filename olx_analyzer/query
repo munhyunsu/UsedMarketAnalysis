@@ -1,0 +1,1 @@
+SELECT COUNT(*) FROM olx WHERE article_phone LIKE '%True%';
