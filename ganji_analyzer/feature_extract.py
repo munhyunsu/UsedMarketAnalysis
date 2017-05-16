@@ -19,14 +19,30 @@ def parse_html(file_path):
     spans = soup.find_all('span', 'phoneNum-type')
     try:
         article_phone = spans[0].contents[0]
-        article_phone.replace(' ', '-')
+        article_phone = article_phone.replace(' ', '-')
         if len(article_phone) < 1:
             article_phone = None
     except:
         article_phone = None
+    # article_time
+    lis = soup.find_all('i', 'f10 pr-5')
+    try:
+        article_time = lis[0].contents[0]
+    except:
+        return None
+    # article_id
+    divs = soup.find_all('div', 'phoneinfor fc-9')
+    try:
+        id_area = divs[0].text
+        article_id = id_area[id_area.find('\n\n ')+2:id_area.find('：\n')]
+        article_id = article_id.strip()
+    except:
+        return None
     # return
     return {'article_number': article_number,
-            'article_phone': article_phone}
+            'article_phone': article_phone,
+            'article_time': article_time,
+            'article_id': article_id}
 
 
 def start_analyze(src_path, connector):
@@ -48,9 +64,13 @@ def start_analyze(src_path, connector):
                     cursor.executescript('''
                             INSERT OR IGNORE INTO ganji
                             (article_number,
-                            article_phone) VALUES
+                            article_phone,
+                            article_time,
+                            article_id) VALUES
                             ("''' + str(ar['article_number']) + '''", "''' +
-                            str(ar['article_phone']) + '''");''')
+                            str(ar['article_phone']) + '''", "''' + 
+                            str(ar['article_time']) + '''", "''' + 
+                            str(ar['article_id']) + '''");''')
                     connector.commit()
                 else:
                     dir_list.append(entry.path)
@@ -65,7 +85,9 @@ def create_database_connector(database):
     cursor.executescript('''
             CREATE TABLE IF NOT EXISTS ganji (
             article_number TEXT PRIMARY KEY NOT NULL UNIQUE,
-            article_phone TEXT);
+            article_phone TEXT,
+            article_time TEXT,
+            article_id TEXT);
             ''')
     connector.commit()
     return connector

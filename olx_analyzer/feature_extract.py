@@ -25,9 +25,37 @@ def parse_html(file_path):
             article_phone = True
     except:
         article_phone = None
+    # article_time
+    divs = soup.find_all('div', 'OLXad-date')
+    try:
+        time_area = divs[0].text
+        article_time = time_area[time_area.find(':')+1:time_area.find('.')]
+        article_time = article_time.strip()
+    except:
+        article_time = None
+    # article_id
+    divs = soup.find_all('div', 'OLXad-location mb20px')
+    try:
+        id_area = divs[0].text
+        article_id = id_area[id_area.find('Bairro:')+7:]
+        article_id = article_id.strip()
+    except:
+        article_id = None
+    # article_loc
+    divs = soup.find_all('div', 'OLXad-location mb20px')
+    try:
+        loc_area = divs[0].text
+        article_loc = loc_area[\
+                loc_area.find('Município:')+10:loc_area.find('CEP:')]
+        article_loc = article_loc.strip()
+    except:
+        article_loc = None
     # return
     return {'article_number': article_number,
-            'article_phone': article_phone}
+            'article_phone': article_phone,
+            'article_time': article_time,
+            'article_id': article_id,
+            'article_loc': article_loc}
 
 
 def start_analyze(src_path, connector):
@@ -49,9 +77,15 @@ def start_analyze(src_path, connector):
                     cursor.executescript('''
                             INSERT OR IGNORE INTO olx
                             (article_number,
-                            article_phone) VALUES
+                            article_phone,
+                            article_time,
+                            article_id,
+                            article_loc) VALUES
                             ("''' + str(ar['article_number']) + '''", "''' +
-                            str(ar['article_phone']) + '''");''')
+                            str(ar['article_phone']) + '''", "''' +
+                            str(ar['article_time']) + '''", "''' +
+                            str(ar['article_id']) + '''", "''' +
+                            str(ar['article_loc']) + '''");''')
                     connector.commit()
                 else:
                     dir_list.append(entry.path)
@@ -66,7 +100,10 @@ def create_database_connector(database):
     cursor.executescript('''
             CREATE TABLE IF NOT EXISTS olx (
             article_number TEXT PRIMARY KEY NOT NULL UNIQUE,
-            article_phone TEXT);
+            article_phone TEXT,
+            article_time TEXT,
+            article_id TEXT,
+            article_loc TEXT);
             ''')
     connector.commit()
     return connector

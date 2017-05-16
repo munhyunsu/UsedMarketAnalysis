@@ -1,0 +1,18 @@
+{
+  "name": "RememberPrivacy",
+  "version": "1.0",
+  "description": "Remember privacy to post web by user.",
+  "permissions": [
+                 "webRequest",
+                 "webRequestBlocking", 
+                 "<all_urls>", 
+                 "alarms",
+                 "notifications"
+                 ],
+  "background": {
+    "scripts": [
+      "background.js"
+      ]
+    },
+  "manifest_version": 2
+}
