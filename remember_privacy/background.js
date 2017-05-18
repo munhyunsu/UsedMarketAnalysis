@@ -19,10 +19,10 @@ chrome.webRequest.onBeforeRequest.addListener(
       if((phone == null) & (email == null)) {
         return;
       }
-      if(confirm('Maybe it has privacy information. Do you want to remember this?\n----[ Phone number ]----\n' + phone + '\n----[ email address ]----\n' + email) == false) {
+      if(confirm('Personally identifiable information may be exposed. Would you like to continue?\n----[ Phone number ]----\n' + phone + '\n----[ email address ]----\n' + email) == false) {
         return {cancel: true};
       }
-      txt = 'Need to delete your privacy!\n[Naver Joonggonara Title] ' + decodeURIComponent(JSON.stringify(details['requestBody']['formData']['subject']));
+      txt = 'It\'s been 30 days since your personally identifiable information was exposed. Your personally identifiable information is still being exposed.\n[Joonggonara Title] ' + decodeURIComponent(JSON.stringify(details['requestBody']['formData']['subject']));
       chrome.alarms.create(txt, {'when': Date.now() + 3000})
   },
   filter = {
@@ -37,8 +37,8 @@ chrome.webRequest.onBeforeRequest.addListener(
 chrome.alarms.onAlarm.addListener(
   callback = function(alarm) {
     chrome.notifications.create({'type': 'basic', 
-                                 'iconUrl': 'IIMG001.jpg',
-                                 'title': 'Privacy alarm',
+                                 'iconUrl': 'TIMG012.png',
+                                 'title': 'Remind PII Notification',
                                  'message': alarm.name})
   }
 );

@@ -1,7 +1,8 @@
 {
-  "name": "RememberPrivacy",
+  "name": "Instant PII Warning",
   "version": "1.0",
-  "description": "Remember privacy to post web by user.",
+  "description": "Extension to alert you about personal identifiable information exposure.",
+  "icons": {"128": "TIMG012.png"},
   "permissions": [
                  "webRequest",
                  "webRequestBlocking", 
