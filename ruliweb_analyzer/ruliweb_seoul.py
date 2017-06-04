@@ -112,7 +112,7 @@ def google_maps_api(district, city):
         city = city + '구'
     request_url = 'https://maps.googleapis.com/maps/api/geocode/json?address='
     request_url = request_url + urllib.parse.quote(district + ' ' + city)
-    request_url = request_url + '&key='
+    request_url = request_url + '&key=AIzaSyCz1vZgkgSVtF7Tr7IYAdjvCsnvqyacojw'
     response = urllib.request.urlopen(request_url)
     rjson = json.loads(response.read())
     try:
@@ -142,9 +142,10 @@ def main():
 
     des_file = open(des_path, 'w')
     des_csv = csv.DictWriter(des_file, fieldnames = [
-            'maxmind', 'ip2location'])
+            'ruliweb', 'maxmind', 'ip2location'])
     des_csv.writeheader()
 
+    seoul_latlng = (37.5653161,126.9745829)
 
     for row in src_csv:
         print(row)
@@ -152,10 +153,12 @@ def main():
         mmdb_latlng = get_latlng_mmdb(row['ipprefix'])
         ip2_latlng = get_latlng_ip2(row['ipprefix'])
 
-        maxmind_distance = get_distance_vincenty(ruliweb_latlng, mmdb_latlng)
-        ip2location_distance = get_distance_vincenty(ruliweb_latlng, ip2_latlng)
+        ruliweb_distance = get_distance_vincenty(seoul_latlng, ruliweb_latlng)
+        maxmind_distance = get_distance_vincenty(seoul_latlng, mmdb_latlng)
+        ip2location_distance = get_distance_vincenty(seoul_latlng, ip2_latlng)
 
-        des_csv.writerow({'maxmind': maxmind_distance,
+        des_csv.writerow({'ruliweb': ruliweb_distance,
+                          'maxmind': maxmind_distance,
                           'ip2location': ip2location_distance})
     # Calculate Distance
 #   for (article_number, article_location, article_ip) in target_list:

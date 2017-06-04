@@ -71,23 +71,22 @@ def afterMain():
 
 
 # Get lat, lng from mmdb
-def get_latlng_mmdb(ip):
+def get_city_mmdb(ip):
     global mmdb_reader
     try:
         response = mmdb_reader.city(ip)
-        return (response.location.latitude, response.location.longitude)
+        return response.city.name
     except geoip2.errors.AddressNotFoundError:
-        response = (37.5985, 126.9783)
-        return response
+        return 'None'
 # End of get_latlng_ip_mmdb
 
 
 
 # Get lat, lng from IP2
-def get_latlng_ip2(ip):
+def get_city_ip2(ip):
     global ip2_reader
     response = ip2_reader.get_all(ip)
-    return (response.latitude, response.longitude)
+    return response.city
 # End of get_latlng_ip_ip2
 
 
@@ -112,7 +111,7 @@ def google_maps_api(district, city):
         city = city + '구'
     request_url = 'https://maps.googleapis.com/maps/api/geocode/json?address='
     request_url = request_url + urllib.parse.quote(district + ' ' + city)
-    request_url = request_url + '&key='
+    request_url = request_url + '&key=AIzaSyCz1vZgkgSVtF7Tr7IYAdjvCsnvqyacojw'
     response = urllib.request.urlopen(request_url)
     rjson = json.loads(response.read())
     try:
@@ -130,48 +129,29 @@ def get_distance_vincenty(latlng1, latlng2):
 # Start of main()
 def main():
     # 인자 파싱
-    if len(sys.argv) < 3:
+    if len(sys.argv) < 2:
         print('We need 1 arguments')
         print('.py [SRC] [DES]')
         sys.exit()
     src_path = sys.argv[1]
-    des_path = sys.argv[2]
 
     src_file = open(src_path, 'r')
     src_csv = csv.DictReader(src_file)
 
-    des_file = open(des_path, 'w')
-    des_csv = csv.DictWriter(des_file, fieldnames = [
-            'maxmind', 'ip2location'])
-    des_csv.writeheader()
 
 
+    mdict = dict()
+    idict = dict()
     for row in src_csv:
-        print(row)
-        ruliweb_latlng = get_latlng_ruliweb(row['district'], row['city'])
-        mmdb_latlng = get_latlng_mmdb(row['ipprefix'])
-        ip2_latlng = get_latlng_ip2(row['ipprefix'])
+        mmdb_city = get_city_mmdb(row['start'])
+        ip2_city = get_city_ip2(row['start'])
 
-        maxmind_distance = get_distance_vincenty(ruliweb_latlng, mmdb_latlng)
-        ip2location_distance = get_distance_vincenty(ruliweb_latlng, ip2_latlng)
+        mdict[mmdb_city] = mdict.get(mmdb_city, 0) + int(row['c24'])*4
+        idict[ip2_city] = idict.get(ip2_city, 0) + int(row['c24'])*4
 
-        des_csv.writerow({'maxmind': maxmind_distance,
-                          'ip2location': ip2location_distance})
-    # Calculate Distance
-#   for (article_number, article_location, article_ip) in target_list:
-#       city_latlng = get_latlng_city(article_location)
-#       mmdb_latlng = get_latlng_mmdb(article_ip)
-#       ip2_latlng = get_latlng_ip2(article_ip)
-#
-#       # distance of each latlng
-#       maxmind_distance = get_distance_vincenty(city_latlng, mmdb_latlng)
-#       ip2location_distance = get_distance_vincenty(city_latlng, ip2_latlng)
-#
-#       if(maxmind_distance > 500) or (ip2location_distance > 500):
-#           print article_number, article_ip, city_latlng, mmdb_latlng, ip2_latlng, maxmind_distance, ip2location_distance
-#
-#       cur.execute('''INSERT OR IGNORE INTO distance (article_number, article_location, maxmind_distance, ip2location_distance) VALUES ( ?, ?, ?, ? )''', (article_number, article_location, maxmind_distance, ip2location_distance) )
-#   conn.commit()
+    print(mdict)
+    print(idict)
+
 
 
 # End of main()
