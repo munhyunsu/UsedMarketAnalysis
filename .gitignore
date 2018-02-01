@@ -36,6 +36,7 @@ whois/whois_htmls/
 
 # ignore html
 *.html
+!/ipgeoweb/**/*.html
 
 # ignore .csv
 *.csv
