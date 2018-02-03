@@ -9,5 +9,6 @@ app = Flask(__name__)
 def index():
     return render_template('index.html')
 
-def search('search'):
+@app.route('search')
+def search():
     return render_template('search.html')
