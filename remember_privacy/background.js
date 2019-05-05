@@ -15,7 +15,9 @@ chrome.webRequest.onBeforeRequest.addListener(
       //var txt2 = unescape(decodeURIComponent(JSON.stringify(details['requestBody'])));
       //console.log(txt2);
       phone = txt.match(/\d{3}-\d{3,4}-\d{4}/g);
+      //(\d|영|하나|일){3}-(\d|영|일|이|삼|사|오|육|칠|팔|구|십|하나|둘|셋|넷|다섯|여섯|일곱|여덟|아홉|열){3,4}-(\d|영|일|이|삼|사|오|육|칠|팔|구|십|하나|둘|셋|넷|다섯|여섯|일곱|여덟|아홉|열){4}
       email = txt.match(/[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*\.[a-zA-Z]{2,3}/g);
+      //[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*@([0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*\.[a-zA-Z]{2,3}|네이버|다음)
       if((phone == null) & (email == null)) {
         return;
       }
@@ -36,7 +38,7 @@ chrome.webRequest.onBeforeRequest.addListener(
 
 chrome.alarms.onAlarm.addListener(
   callback = function(alarm) {
-    chrome.notifications.create({'type': 'basic', 
+    chrome.notifications.create({'type': 'basic',
                                  'iconUrl': 'TIMG012.png',
                                  'title': 'Remind PII Notification',
                                  'message': alarm.name})
