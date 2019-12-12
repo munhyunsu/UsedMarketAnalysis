@@ -12,3 +12,10 @@ scrapy를 이용한 수집기
 ## 개인정보 노출 알림: remember\_privacy
 - Chrome extension
 
+
+# Paper
+- Hyunsu Mun, Youngseok Lee. "Analysis and Nudging of Personally Identifiable Information in Online Used Markets". TPS 2019. Dec 2019.
+
+## Coded by
+- LuHa (munhyunsu@gmail.com)
+
