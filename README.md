@@ -14,7 +14,7 @@ scrapy를 이용한 수집기
 
 
 # Paper
-- Hyunsu Mun, Youngseok Lee. "Analysis and Nudging of Personally Identifiable Information in Online Used Markets". TPS 2019. Dec 2019.
+- Hyunsu Mun, Youngseok Lee. "Analysis and Nudging of Personally Identifiable Information in Online Used Markets". The First IEEE International Conference on Trust, Privacy and Security in Intelligent Systems, and Applications. Dec 2019.
 
 ## Coded by
 - LuHa (munhyunsu@gmail.com)
