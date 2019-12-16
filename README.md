@@ -15,6 +15,7 @@ scrapy를 이용한 수집기
 
 # Paper
 - Hyunsu Mun and Youngseok Lee. "Examining Privacy Leakage from Online Used Markets in Korea", IEICE TRANSACTIONS on Information and Systems 99 (4), pp. 891-894. 2016.
+- Hyunsu Mun and Youngseok Lee. "Building IP geolocation database from online used market articles", 2017 19th Asia-Pacific Network Operations and Management Symposium (APNOMS 2017), IEEE. pp. 37-41, 2017
 - Hyunsu Mun and Youngseok Lee. "Analysis and Nudging of Personally Identifiable Information in Online Used Markets". The First IEEE International Conference on Trust, Privacy and Security in Intelligent Systems, and Applications. Dec 2019.
 
 ## Coded by
